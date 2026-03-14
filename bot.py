@@ -1,6 +1,4 @@
-
-   
-   """
+"""
 SOL/USDT Futures - PVI Crossover Paper Trading Simulator
 - Entry  : PVI crosses above EMA(13)
 - SL     : Below crossover candle low
