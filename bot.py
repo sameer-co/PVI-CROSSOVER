@@ -82,15 +82,21 @@ def fetch_klines(interval: str, limit: int = CANDLES_NEEDED) -> list[dict]:
 
 def calc_pvi(candles: list[dict]) -> list[float]:
     n = len(candles)
-    pvi = [1.0] * n
+    pvi = [1000.0] * n          # start at 1000, matching TradingView convention
     for i in range(1, n):
         pc  = candles[i-1]["close"]
         cc  = candles[i]["close"]
         chg = (cc - pc) / pc if pc != 0 else 0.0
-        pvi[i] = pvi[i-1] * (1 + chg) \
+        pvi[i] = pvi[i-1] * (1.0 + chg) \
                  if candles[i]["volume"] > candles[i-1]["volume"] \
                  else pvi[i-1]
-    return [v * 1000.0 for v in pvi]
+    # Normalize entire series relative to its own last value.
+    # Absolute value will still differ from TV (different history length)
+    # but PVI vs EMA relationship — i.e. crossover detection — is preserved.
+    last = pvi[-1]
+    if last != 0:
+        pvi = [v / last * 1000.0 for v in pvi]
+    return pvi
 
 def calc_ema(series: list[float], length: int) -> list[float]:
     result = [float("nan")] * len(series)
